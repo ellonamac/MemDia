@@ -1,0 +1,7 @@
+<svg width="220" height="95" style="max-width: unset;">
+    <rect x="80" y="35" width="40" height="40" stroke="black" fill="none"></rect>
+    <text x="70" y="55" text-anchor="end" alignment-baseline="middle" fill="black">count</text>
+    <text x="80" y="25" alignment-baseline="middle" fill="black" font-style="italic"
+        style="font-size: 0.8em;">int</text>
+    <text x="100" y="55" text-anchor="middle" alignment-baseline="middle" fill="black">159</text>
+</svg>

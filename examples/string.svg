@@ -1,0 +1,17 @@
+<svg width="300" height="95" style="max-width: unset;">
+    <rect x="70" y="35" width="40" height="40" stroke="black" fill="none"></rect>
+    <text x="60" y="55" text-anchor="end" alignment-baseline="middle" fill="black">mood</text>
+    <text x="70" y="25" alignment-baseline="middle" fill="black" font-style="italic"
+        style="font-size: 0.8em;">String</text>
+    <rect x="190" y="35" width="90" height="40" stroke="black" fill="none"></rect>
+    <text x="190" y="25" alignment-baseline="middle" fill="black" font-style="italic"
+        style="font-size: 0.8em;">String</text>
+    <text x="235" y="55" text-anchor="middle" alignment-baseline="middle" fill="black">"happy"</text>
+    <defs>
+        <marker id="arrow" markerWidth="16" markerHeight="16" viewBox="0 0 12 12" refX="6" refY="6" orient="auto">
+            <path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="black"></path>
+        </marker>
+    </defs>
+    <circle cx="90" cy="55" r="2" fill="black"></circle>
+    <line x1="90" y1="55" x2="182" y2="51" stroke="black" marker-end="url(#arrow)"></line>
+</svg>
