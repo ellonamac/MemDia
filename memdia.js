@@ -55,15 +55,32 @@ class Variable {
 /**
  * Draw a memory diagram.
  *
- * @param {string} input_id element with source code
- * @param {string} image_id element to add the image
- * @param {string} output_id where to display output
+ * @param {string} input element with source code
+ * @param {string} image element to add the image
+ * @param {string} output where to display output
  */
-function draw_diagram(input_id, image_id, output_id) {
-    input = document.getElementById(input_id);
-    image = document.getElementById(image_id);
-    output = document.getElementById(output_id);
+function draw_diagram(input, image, output) {
+    if (typeof input === 'string') {
+        input = document.getElementById(input);
+    }
+    if (typeof image === 'string') {
+        image = document.getElementById(image);
+    }
+    if (typeof output === 'string') {
+        output = document.getElementById(output);
+    }
+    // 2nd parameter is optional
+    if (!image) {
+        image = input;
+    }
 
     dia = new Diagram(input.textContent);
     dia.render(image);
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    let divs = document.getElementsByClassName("memdia");
+    for (let i = 0; i < divs.length; i++) {
+        draw_diagram(divs[i]);
+    }
+});
