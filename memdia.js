@@ -22,11 +22,41 @@ class Diagram {
         svg.setAttribute("width", "220");
         svg.setAttribute("height", "95");
 
+        // NOTE THERE IS PROBABLY AN EASIER WAY TO DO THIS IN LESS LOOPS??
+
+        // variable name
+        for (let i = 0; i < this.nodes.length; i++) {
+        let text = document.createElementNS(NS, "text");
+        text.setAttribute("x", "30");
+        text.setAttribute("y", "60");
+        text.textContent = this.nodes[i].name;
+        svg.appendChild(text);
+        }
+
+        // variable type
+        for (let i = 0; i < this.nodes.length; i++) {
+            let text = document.createElementNS(NS, "text");
+            text.setAttribute("x", "80");
+            text.setAttribute("y", "30");
+            text.textContent = this.nodes[i].type;
+            svg.appendChild(text);
+        }
+
+        // variable value
+        for (let i = 0; i < this.nodes.length; i++) {
+            let text = document.createElementNS(NS, "text");
+            text.setAttribute("x", "85");
+            text.setAttribute("y", "60");
+            text.textContent = this.nodes[i].value;
+            svg.appendChild(text);
+        }
+            
         // replace previous contents
         while (div.firstChild) {
             div.removeChild(div.firstChild);
         }
         div.appendChild(svg);
+        div
 
         // append the child elements
         for (let i = 0; i < this.nodes.length; i++) {
@@ -46,10 +76,15 @@ class Variable {
         this.height = 40;
         this.name_width = 0;
         this.type_height = 0;
+
+        this.type = self.type;
+        this.name = self.name;
+        this.value = self.value;
     }
     render(svg) {
         draw_rect(svg, this);
     }
+
 }
 
 /**
@@ -75,12 +110,52 @@ function draw_diagram(input, image, output) {
     }
 
     dia = new Diagram(input.textContent);
+    // add the name before the box here
     dia.render(image);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    let divs = document.getElementsByClassName("memdia");
+    let divs = document.getElementsByClassName("memdia"); // get all divs 
     for (let i = 0; i < divs.length; i++) {
-        draw_diagram(divs[i]);
+        draw_diagram(divs[i]); // draw each one
     }
 });
+
+
+/**
+ * def draw_name(box):
+    return f"""
+svg.append("text")
+  .attr("x", {box.x + box.name_width - TEXT_W})
+  .attr("y", {box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2})
+  .attr("text-anchor", "end")
+  .attr("alignment-baseline", "middle")
+  .attr("fill", "{FG_COLOR}")
+  .text("{box.name}");
+""" if box.name_width else ""
+
+
+def draw_type(box):
+    return f"""
+svg.append("text")
+  .attr("x", {box.x + box.name_width})
+  .attr("y", {box.y + TEXT_H / 3})
+  .attr("alignment-baseline", "middle")
+  .attr("fill", "{FG_COLOR}")
+  .attr("font-style", "italic")
+  .style("font-size", "0.8em")
+  .text("{box.type}");
+""" if box.type_height else ""
+
+
+def draw_value(box):
+    return f"""
+svg.append("text")
+  .attr("x", {box.x + box.width / 2 + box.name_width / 2})
+  .attr("y", {box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2})
+  .attr("text-anchor", "middle")
+  .attr("alignment-baseline", "middle")
+  .attr("fill", "{FG_COLOR}")
+  .text('{box.value}');
+""" if not ARROWS or box.op != "->" else ""
+ */
