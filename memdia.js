@@ -56,8 +56,8 @@ class Diagram {
     }
     render(div) {
         let svg = document.createElementNS(NS, "svg");
-        svg.setAttribute("width", "160");
-        svg.setAttribute("height", "80");
+        svg.setAttribute("width", "160");  // TODO left_width + right_width
+        svg.setAttribute("height", "80");  // TODO max(left_y, right_y)
 
         // replace previous contents
         while (div.firstChild) {
@@ -74,21 +74,17 @@ class Diagram {
 
 class Variable {
     constructor(line) {
-        [self.type, self.name, self.op, ...self.value] = line.split(" ");
-        self.value = self.value.join(" ");
+        [this.type, this.name, this.op, ...this.value] = line.split(" ");
+        this.value = this.value.join(" ");
 
         this.x = 60;
         this.y = 0;
         this.width = 60;
         this.height = 60;
 
-        this.name_width = 15;       // TODO name_text.getBBox().width;
-        this.type_height = TEXT_H;  // TODO type_text.getBBox().height;
-        this.index_height = 0;      // TODO index_text.getBBox().height;
-
-        this.type = self.type;
-        this.name = self.name;
-        this.value = self.value;
+        this.name_width = 15;       // TODO name_text.getBBox().width
+        this.type_height = TEXT_H;  // TODO type_text.getBBox().height
+        this.index_height = 0;      // TODO index_text.getBBox().height
     }
     render(svg) {
         draw_rect(svg, this);
@@ -116,19 +112,27 @@ function draw_diagram(input, image, output) {
     if (typeof output === 'string') {
         output = document.getElementById(output);
     }
+
     // 2nd parameter is optional
     if (!image) {
         image = input;
     }
+    // 3rd parameter is optional too
+    if (!image) {
+        output = input;
+    }
 
+    // construct and render the diagram
     dia = new Diagram(input.textContent);
-    // add the name before the box here
     dia.render(image);
 }
 
+/**
+ * Automatically call draw_diagram() on all memdia elements.
+ */
 document.addEventListener("DOMContentLoaded", function () {
-    let divs = document.getElementsByClassName("memdia");  // get all divs
+    let divs = document.getElementsByClassName("memdia");
     for (let i = 0; i < divs.length; i++) {
-        draw_diagram(divs[i]);  // draw each one
+        draw_diagram(divs[i]);
     }
 });
