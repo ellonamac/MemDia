@@ -1,15 +1,52 @@
 const NS = "http://www.w3.org/2000/svg";
 
+const TEXT_W = 10  // average width of a letter
+const TEXT_H = 15  // average height of a letter
+
 function draw_rect(svg, obj) {
     let rect = document.createElementNS(NS, "rect");
     svg.appendChild(rect);
 
-    rect.setAttribute("x", obj.x);
-    rect.setAttribute("y", obj.y);
-    rect.setAttribute("width", obj.width);
-    rect.setAttribute("height", obj.height);
+    rect.setAttribute("x", obj.x + obj.name_width);
+    rect.setAttribute("y", obj.y + obj.type_height);
+    rect.setAttribute("width", obj.width - obj.name_width);
+    rect.setAttribute("height", obj.height - obj.type_height - obj.index_height);
     rect.setAttribute("stroke", "black");
     rect.setAttribute("fill", "none");
+}
+
+function draw_name(svg, obj) {
+    let text = document.createElementNS(NS, "text");
+    svg.appendChild(text);
+    text.textContent = obj.name;
+
+    text.setAttribute("x", obj.x + obj.name_width - TEXT_W);
+    text.setAttribute("y", obj.y + obj.height / 2 + obj.type_height / 2 - obj.index_height / 2);
+    text.setAttribute("text-anchor", "end");
+    text.setAttribute("alignment-baseline", "middle");
+}
+
+function draw_type(svg, obj) {
+    let text = document.createElementNS(NS, "text");
+    svg.appendChild(text);
+    text.textContent = obj.type;
+
+    text.setAttribute("x", obj.x + obj.name_width);
+    text.setAttribute("y", obj.y + TEXT_H / 3);
+    text.setAttribute("alignment-baseline", "middle");
+    text.setAttribute("font-style", "italic");
+    text.setAttribute("font-size", "0.8em");
+}
+
+function draw_value(svg, obj) {
+    let text = document.createElementNS(NS, "text");
+    svg.appendChild(text);
+    text.textContent = obj.value;
+
+    text.setAttribute("x", obj.x + obj.width / 2 + obj.name_width / 2);
+    text.setAttribute("y", obj.y + obj.height / 2 + obj.type_height / 2 - obj.index_height / 2);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("alignment-baseline", "middle");
 }
 
 class Diagram {
@@ -19,44 +56,14 @@ class Diagram {
     }
     render(div) {
         let svg = document.createElementNS(NS, "svg");
-        svg.setAttribute("width", "220");
-        svg.setAttribute("height", "95");
+        svg.setAttribute("width", "160");
+        svg.setAttribute("height", "80");
 
-        // NOTE THERE IS PROBABLY AN EASIER WAY TO DO THIS IN LESS LOOPS??
-
-        // variable name
-        for (let i = 0; i < this.nodes.length; i++) {
-        let text = document.createElementNS(NS, "text");
-        text.setAttribute("x", "30");
-        text.setAttribute("y", "60");
-        text.textContent = this.nodes[i].name;
-        svg.appendChild(text);
-        }
-
-        // variable type
-        for (let i = 0; i < this.nodes.length; i++) {
-            let text = document.createElementNS(NS, "text");
-            text.setAttribute("x", "80");
-            text.setAttribute("y", "30");
-            text.textContent = this.nodes[i].type;
-            svg.appendChild(text);
-        }
-
-        // variable value
-        for (let i = 0; i < this.nodes.length; i++) {
-            let text = document.createElementNS(NS, "text");
-            text.setAttribute("x", "85");
-            text.setAttribute("y", "60");
-            text.textContent = this.nodes[i].value;
-            svg.appendChild(text);
-        }
-            
         // replace previous contents
         while (div.firstChild) {
             div.removeChild(div.firstChild);
         }
         div.appendChild(svg);
-        div
 
         // append the child elements
         for (let i = 0; i < this.nodes.length; i++) {
@@ -70,12 +77,14 @@ class Variable {
         [self.type, self.name, self.op, ...self.value] = line.split(" ");
         self.value = self.value.join(" ");
 
-        this.x = 80;
-        this.y = 35;
-        this.width = 40;
-        this.height = 40;
-        this.name_width = 0;
-        this.type_height = 0;
+        this.x = 60;
+        this.y = 0;
+        this.width = 60;
+        this.height = 60;
+
+        this.name_width = 15;       // TODO name_text.getBBox().width;
+        this.type_height = TEXT_H;  // TODO type_text.getBBox().height;
+        this.index_height = 0;      // TODO index_text.getBBox().height;
 
         this.type = self.type;
         this.name = self.name;
@@ -83,6 +92,9 @@ class Variable {
     }
     render(svg) {
         draw_rect(svg, this);
+        draw_name(svg, this);
+        draw_type(svg, this);
+        draw_value(svg, this);
     }
 
 }
@@ -115,47 +127,8 @@ function draw_diagram(input, image, output) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    let divs = document.getElementsByClassName("memdia"); // get all divs 
+    let divs = document.getElementsByClassName("memdia");  // get all divs
     for (let i = 0; i < divs.length; i++) {
-        draw_diagram(divs[i]); // draw each one
+        draw_diagram(divs[i]);  // draw each one
     }
 });
-
-
-/**
- * def draw_name(box):
-    return f"""
-svg.append("text")
-  .attr("x", {box.x + box.name_width - TEXT_W})
-  .attr("y", {box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2})
-  .attr("text-anchor", "end")
-  .attr("alignment-baseline", "middle")
-  .attr("fill", "{FG_COLOR}")
-  .text("{box.name}");
-""" if box.name_width else ""
-
-
-def draw_type(box):
-    return f"""
-svg.append("text")
-  .attr("x", {box.x + box.name_width})
-  .attr("y", {box.y + TEXT_H / 3})
-  .attr("alignment-baseline", "middle")
-  .attr("fill", "{FG_COLOR}")
-  .attr("font-style", "italic")
-  .style("font-size", "0.8em")
-  .text("{box.type}");
-""" if box.type_height else ""
-
-
-def draw_value(box):
-    return f"""
-svg.append("text")
-  .attr("x", {box.x + box.width / 2 + box.name_width / 2})
-  .attr("y", {box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2})
-  .attr("text-anchor", "middle")
-  .attr("alignment-baseline", "middle")
-  .attr("fill", "{FG_COLOR}")
-  .text('{box.value}');
-""" if not ARROWS or box.op != "->" else ""
- */
