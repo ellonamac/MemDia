@@ -51,7 +51,7 @@ public class Person {
 A memory diagram has two sides: static data and stack frames are on the left, and heap objects are on the right.
 At the end of `main()`, the memory diagram looks like this:
 
-![Diagram of Person.java](Person.svg)
+<img src="https://raw.githubusercontent.com/ellonamac/MemDia/main/Person.svg">
 
 
 ## Language Syntax
