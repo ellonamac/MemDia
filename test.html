@@ -3,20 +3,26 @@
 <head>
     <title>MemDia Test Page</title>
     <script src="memdia.js"></script>
+    <style>
+        h1 {
+            font-size: 16pt;
+            padding-top: 1em;
+        }
+    </style>
 </head>
 <body>
 
 
-<h1>Test Button</h1>
+<h1>Test anything</h1>
 
-<textarea id="input1">
+<textarea id="input1" cols="30" rows="5">
 int count = 159
 </textarea>
 <div><button onclick="draw_diagram('input1', 'image1')">Draw</button></div>
 <div id="image1"></div>
 
 
-<h1>Test variables</h1>
+<h1>Variables</h1>
 
 <div class="memdia">
 int count = 159
@@ -24,7 +30,7 @@ double sum = 0.0
 </div>
 
 
-<h1>Test methods</h1>
+<h1>Functions</h1>
 
 <div class="memdia">
 main:
@@ -37,7 +43,7 @@ print:
 </div>
 
 
-<h1>Test objects</h1>
+<h1>Objects</h1>
 
 <div class="memdia">
 String status -> S1
@@ -52,21 +58,32 @@ P1: Point
 </div>
 
 
-<h1>Test arrays</h1>
+<h1>Arrays</h1>
 
 <div class="memdia">
-int[] a -> A1
+int[] nums -> A1
+String[] words -> A2
 
 A1: int[]
     {1, 2, 3}
+
+A2: String[]
+    {S1, S2}
+
+S1: String
+    "A"
+
+S1: String
+    "B"
 </div>
 
 
-<h1>Test inline</h1>
+<h1>Literals</h1>
 
 <div class="memdia">
 String status -> "okay"
 int[] pts = {1, 2, 3}
+int[] both = {"hi", "ho"}
 </div>
 
 
