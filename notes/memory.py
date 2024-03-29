@@ -340,18 +340,18 @@ class SmallBox:
 
         line = line.lstrip()
         if line.startswith('"') and line.endswith('"'):
-            # String object
+            # String literal
             self.op = ""
             self.value = line
             self.width = (len(self.value) - 2) * TEXT_W
             self.height = 0
         elif line.startswith('{') and line.endswith('}'):
-            # Array object
+            # Array literal
             self.op = "->"
             self.value = []
             self.width = 0
             self.height = 0
-            # Array elements
+            # Create array elements
             for i, val in enumerate(line[1:-1].split(",")):
                 val = val.strip()
                 # Type inference
@@ -396,7 +396,7 @@ class SmallBox:
 
     def __str__(self):
         if not self.op:
-            # String object
+            # Draw string text
             return f"""
 svg.append("text")
   .attr("x", {self.x + self.width / 2})
@@ -408,7 +408,7 @@ svg.append("text")
 """
 
         elif type(self.value) is list:
-            # Array object
+            # Draw array vertical lines
             x = self.x
             lines = ""
             for i in range(1, len(self.value)):
@@ -424,7 +424,7 @@ svg.append("line")
             return lines + "".join([str(node) for node in self.value])
 
         else:
-            # Variable box
+            # Draw variable box / array element
             return f"""
 {draw_rect(self)}
 {draw_name(self)}
