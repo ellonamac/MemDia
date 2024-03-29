@@ -1,7 +1,13 @@
 const NS = "http://www.w3.org/2000/svg";
 
-const TEXT_W = 10  // average width of a letter
-const TEXT_H = 15  // average height of a letter
+const MARGIN = 20;  // spacing between each box
+const TEXT_W = 10;  // average width of a letter
+const TEXT_H = 15;  // average height of a letter
+const BOX_WH = 40;  // min width/height of var box
+
+const BG_COLOR = "#fafafa";  // TODO use CSS instead
+const FG_COLOR = "#000000";  // TODO use CSS instead
+
 
 function draw_rect(svg, obj) {
     let rect = document.createElementNS(NS, "rect");
@@ -11,7 +17,7 @@ function draw_rect(svg, obj) {
     rect.setAttribute("y", obj.y + obj.type_height);
     rect.setAttribute("width", obj.width - obj.name_width);
     rect.setAttribute("height", obj.height - obj.type_height - obj.index_height);
-    rect.setAttribute("stroke", "black");
+    rect.setAttribute("stroke", FG_COLOR);
     rect.setAttribute("fill", "none");
 }
 
@@ -58,6 +64,7 @@ class Diagram {
         let svg = document.createElementNS(NS, "svg");
         svg.setAttribute("width", "160");  // TODO left_width + right_width
         svg.setAttribute("height", "80");  // TODO max(left_y, right_y)
+        svg.style.backgroundColor = BG_COLOR;
 
         // replace previous contents
         while (div.firstChild) {
