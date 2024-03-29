@@ -1,0 +1,7 @@
+main:
+    int hour = 11
+    int minute = 59
+
+print:
+    int hour = 12
+    int minute = 15

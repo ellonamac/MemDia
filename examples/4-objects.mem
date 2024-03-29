@@ -1,0 +1,10 @@
+Point p1 -> P1
+Point p2 -> P2
+
+P1: Point
+    int x = 11
+    int y = 12
+
+P2: Point
+    int x = 13
+    int y = 14
