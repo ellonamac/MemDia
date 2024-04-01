@@ -62,43 +62,12 @@ class Diagram {
     }
     render(div) {
         let svg = document.createElementNS(NS, "svg");
+        svg.setAttribute("width", "160");  // TODO left_width + right_width
+        svg.setAttribute("height", "80");  // TODO max(left_y, right_y)
+        svg.style.backgroundColor = BG_COLOR;
         svg.setAttribute("width", "220");
         svg.setAttribute("height", "95");
-
-        // NOTE THERE IS PROBABLY AN EASIER WAY TO DO THIS IN LESS LOOPS??
-
-        // variable name
-        for (let i = 0; i < this.nodes.length; i++) {
-        let text = document.createElementNS(NS, "text");
-        text.setAttribute("x", "30");
-        text.setAttribute("y", "60");
-        text.textContent = this.nodes[i].name;
-        svg.appendChild(text);
-        }
-
-        // variable type
-        for (let i = 0; i < this.nodes.length; i++) {
-            let text = document.createElementNS(NS, "text");
-            text.setAttribute("x", "80");
-            text.setAttribute("y", "30");
-            text.textContent = this.nodes[i].type;
-            svg.appendChild(text);
-        }
-
-        // variable value
-        for (let i = 0; i < this.nodes.length; i++) {
-            let text = document.createElementNS(NS, "text");
-            text.setAttribute("x", "85");
-            text.setAttribute("y", "60");
-            text.textContent = this.nodes[i].value;
-            svg.appendChild(text);
-        }
-
-        // for (let i = 0; i < this.nodes.length; i++){
-        //     let value = document.createElementNS(NS, "value");
-        //     let type = document.createElementNS(NS, "type");
-        //     let name = document.createElementNS(NS, "name");
-        // }
+        
             
         // replace previous contents
         while (div.firstChild) {
@@ -109,6 +78,29 @@ class Diagram {
         // append the child elements
         for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].render(svg);
+        }
+    }
+}
+
+class Method{
+    constructor(line){
+        [this.name, ...this.var] = line.split("/n");
+        let variables = [];
+
+        // will need to add a check for whether it is a variable or something else
+        for (let i = 0; i < this.var.length; i++){
+            variables.push(new Variable(this.var[i]));
+        }
+        // one is split by new line, then it needs to be split again to pass in the syntax for variables
+    }
+    render(svg){
+        draw_rect(svg, this);
+        draw_name(svg, this);
+        draw_type(svg, this);
+        draw_value(svg, this);
+        // should call variables render
+        for (let i = 0; i < variables.length; i++){
+            variables[i].render(svg);
         }
     }
 }
