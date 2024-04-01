@@ -1,5 +1,5 @@
 # MemDia
-JavaScript library for drawing memory diagrams.
+JavaScript library for drawing memory diagrams
 
 
 ## Usage
@@ -10,7 +10,7 @@ Include `memdia.js` in the document `<head>`:
 <script src="memdia.js"></script>
 ```
 
-Write code in an element with class `memdia`:
+Write your diagram specification in any element with class `memdia`:
 
 ``` html
 <div class="memdia">
@@ -19,7 +19,7 @@ main:
 </div>
 ```
 
-The library replaces your code with an `<svg>` when `DOMContentLoaded`.
+The library replaces your spec with an `<svg>` when `DOMContentLoaded`.
 
 
 ## Example Diagram
@@ -63,15 +63,15 @@ The source code for the above diagram is:
     int count = 2
 
 main:
-    Person p1 -> P1
-    Person p2 -> P2
+    Person p1 @ P1
+    Person p2 @ P2
 
 P1: Person
-    String name -> "Taylor"
+    String name @ "Taylor"
     int pin = 1989
 
 P2: Person
-    String name -> "Travis"
+    String name @ "Travis"
     int pin = 8713
 ```
 
@@ -85,13 +85,13 @@ The first line of each block specifies the block's *name* and *type* separated b
 * If both a name and type are given, the block represents a heap object.
     * Example: `P1: Person`
 
-Each subsequent line of a block represents a *variable*.
+Each subsequent line of the block represents a *variable*.
 Each variable has the syntax `type name operator value`.
-The type and name must be one word.
+The type and name must each be one word.
 The value can be any string (including spaces).
 
 This diagram syntax is intended to be language agnostic.
-The operator can be either `=` (primitive) or `->` (reference).
-The value after `->` can be an object name (like `P1`), a string literal (in double quotes), or an array (in curly braces).
+The operator can be either `=` (primitive) or `@` (arrow / reference).
+The value after `@` can be an object name (like `P1`), a string literal (in double quotes), or an array (in curly braces).
 
 Indentation is optional, and extra whitespace is ignored.
