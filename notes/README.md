@@ -9,6 +9,7 @@ Most of the Python code was organized into the three classes described below.
 * [Memory Diagrams](https://w3.cs.jmu.edu/cs159/s24/docs/memory/)
 * [Memory Diagrams (test)](https://w3.cs.jmu.edu/cs159/s24/docs/memtest/)
 * [Mozilla Web Docs](https://developer.mozilla.org/en-US/docs/Web)
+* [SVG Tutorial (MDN)](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/)
 
 
 ## Diagram class
@@ -18,6 +19,7 @@ Represents the entire memory diagram.
 * Constructor takes the entire source code
 * Left side: global variables, stack frames, static data
 * Right side: objects, arrays, inline strings/arrays
+* Child nodes are LargeBox
 
 Attribute    | Description
 -------------|------------------------------
@@ -36,7 +38,7 @@ nodes        | LargeBox/SmallBox children
 
 Represents a stack frame, heap object, or static data.
 
-* Constructor takes one block of code
+* Constructor takes one block of source code
 * Special case: Array object (type ends with "[]")
 * Child nodes are SmallBox
 
@@ -62,9 +64,9 @@ refs         | number of arrows to this box
 
 Usually represents a variable (or array element).
 
-* Constructor takes one line of code
+* Constructor takes one line of source code
 * Special case: String literal
-* Special case: Array literal
+* Special case: Array literal (value is array of SmallBox)
 * Special case: Array element ("__" in name)
 
 Attribute    | Description
