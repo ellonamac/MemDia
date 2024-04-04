@@ -9,66 +9,87 @@ const BG_COLOR = "#fafafa";  // TODO use CSS instead
 const FG_COLOR = "#000000";  // TODO use CSS instead
 
 
-function draw_rect(svg, obj) {
+//  QUESTIONNS : left_y, and line 112
+
+function draw_rect(svg, box) {
     let rect = document.createElementNS(NS, "rect");
     svg.appendChild(rect);
 
-    rect.setAttribute("x", obj.x + obj.name_width);
-    rect.setAttribute("y", obj.y + obj.type_height);
-    rect.setAttribute("width", obj.width - obj.name_width);
-    rect.setAttribute("height", obj.height - obj.type_height - obj.index_height);
+    rect.setAttribute("x", box.x + box.name_width);
+    rect.setAttribute("y", box.y + box.type_height);
+    rect.setAttribute("width", box.width - box.name_width);
+    rect.setAttribute("height", box.height - box.type_height - box.index_height);
     rect.setAttribute("stroke", FG_COLOR);
     rect.setAttribute("fill", "none");
 }
 
-function draw_name(svg, obj) {
+function draw_name(svg, box) {
     let text = document.createElementNS(NS, "text");
     svg.appendChild(text);
-    text.textContent = obj.name;
+    text.textContent = box.name;
 
-    text.setAttribute("x", obj.x + obj.name_width - TEXT_W);
-    text.setAttribute("y", obj.y + obj.height / 2 + obj.type_height / 2 - obj.index_height / 2);
+    text.setAttribute("x", box.x + box.name_width - TEXT_W);
+    text.setAttribute("y", box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2);
     text.setAttribute("text-anchor", "end");
     text.setAttribute("alignment-baseline", "middle");
 }
 
-function draw_type(svg, obj) {
+function draw_type(svg, box) {
     let text = document.createElementNS(NS, "text");
     svg.appendChild(text);
-    text.textContent = obj.type;
+    text.textContent = box.type;
 
-    text.setAttribute("x", obj.x + obj.name_width);
-    text.setAttribute("y", obj.y + TEXT_H / 3);
+    text.setAttribute("x", box.x + box.name_width);
+    text.setAttribute("y", box.y + TEXT_H / 3);
     text.setAttribute("alignment-baseline", "middle");
     text.setAttribute("font-style", "italic");
     text.setAttribute("font-size", "0.8em");
 }
 
-function draw_value(svg, obj) {
+function draw_value(svg, box) {
     let text = document.createElementNS(NS, "text");
     svg.appendChild(text);
-    text.textContent = obj.value;
+    text.textContent = box.value;
 
-    text.setAttribute("x", obj.x + obj.width / 2 + obj.name_width / 2);
-    text.setAttribute("y", obj.y + obj.height / 2 + obj.type_height / 2 - obj.index_height / 2);
+    text.setAttribute("x", box.x + box.width / 2 + box.name_width / 2);
+    text.setAttribute("y", box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2);
     text.setAttribute("text-anchor", "middle");
     text.setAttribute("alignment-baseline", "middle");
 }
 
 class Diagram {
     constructor(code) {
+        this.left_y = MARGIN; // was just let
+        this.left_width = 3 * MARGIN; 
+        this.right_y = this.left_y; // was just let
+        this.right_width = this.left_width;
+
         this.nodes = [];
-        this.nodes.push(new Variable(code));
+
+        let blocks = code.trim().split("\n\n");
+
+
+        for (let i = 0; i < blocks.length; i++) {
+            let node = new LargeBox(blocks[i], MARGIN, this.left_y);
+            this.nodes.push(node);
+            this.left_y += node.height + MARGIN;
+            this.left_width = Math.max(this.left_width, 3 * MARGIN + node.width);
+        }
+
+        // diagram size
+        this.width = this.left_width + this.right_width;
+        this.height = Math.max(this.left_y, this.right_y); // NAN
+
     }
     render(div) {
         let svg = document.createElementNS(NS, "svg");
-        svg.setAttribute("width", "160");  // TODO left_width + right_width
-        svg.setAttribute("height", "80");  // TODO max(left_y, right_y)
+        svg.setAttribute("width", this.left_width + this.right_width);  // TODO left_width + right_width ("width", "160")
+        svg.setAttribute("height", Math.max(this.left_y, this.right_y));  // TODO max(left_y, right_y) ("height", "80")
         svg.style.backgroundColor = BG_COLOR;
-        svg.setAttribute("width", "220");
-        svg.setAttribute("height", "95");
-        
-            
+        svg.setAttribute("width", this.width); // 220 think deals with diagram not svg
+        svg.setAttribute("height", this.height); // 95
+
+
         // replace previous contents
         while (div.firstChild) {
             div.removeChild(div.firstChild);
@@ -82,42 +103,92 @@ class Diagram {
     }
 }
 
-class Method{
-    constructor(line){
-        [this.name, ...this.var] = line.split("/n");
-        let variables = [];
+class LargeBox {
+    constructor(code, x, y) {
+        this.nodes = [];
+        this.x = x;
+        this.y = y;
 
-        // will need to add a check for whether it is a variable or something else
-        for (let i = 0; i < this.var.length; i++){
-            variables.push(new Variable(this.var[i]));
+        let lines = code.split("\n");
+        if (lines[0].includes(":")) {
+            // parse the block specifiation
+            let parts = lines[0].split(":");
+            this.name = parts[0].trim();
+            this.type = parts[1].trim();
+
+            this.margin = MARGIN;
+            this.width = 2 * MARGIN;
+            this.height = MARGIN;
+        } else {
+            // noname block (global variables)
+            this.name = "";
+            this.type = ""; // no type = function
+
+            this.margin = 0;
+            this.width = 0;
+            this.height = -MARGIN;
         }
-        // one is split by new line, then it needs to be split again to pass in the syntax for variables
+
+        if (this.name && this.height > 0) {
+            this.name_width = (this.name.length + 1) * TEXT_W;
+            this.width += this.name_width;
+        } else {
+            this.name_width = 0;
+        }
+        // deal with adding type in the future
+        this.type_height = 0;
+        this.index_height = 0;
+
+        // parse the remaining lines
+        let i = 0;
+        if (lines[0].includes(":")) {
+            i = 1;
+        }
+        for (; i < lines.length; i++) {
+            let node = new SmallBox(lines[i], x + this.name_width + this.margin, y + this.margin);
+            this.nodes.push(node);
+            this.width = Math.max(this.width, 2 * this.margin + this.name_width + node.width); // BECOMING NAN HERE
+            this.height += node.height + MARGIN; // AND HERE
+            y += node.height + MARGIN; // check on this (should it just be y or this.y)
+        }
     }
-    render(svg){
-        draw_rect(svg, this);
+    render(svg) {
+        if (!this.name == ""){
+            draw_rect(svg, this);
+        }
         draw_name(svg, this);
         draw_type(svg, this);
         draw_value(svg, this);
-        // should call variables render
-        for (let i = 0; i < variables.length; i++){
-            variables[i].render(svg);
+        // should call small boxes render
+        for (let i = 0; i < this.nodes.length; i++) {
+            this.nodes[i].render(svg);
         }
     }
 }
 
-class Variable {
-    constructor(line) {
+class SmallBox {
+    constructor(code, x, y) {
+        let line = code.trim();
         [this.type, this.name, this.op, ...this.value] = line.split(" ");
         this.value = this.value.join(" ");
 
-        this.x = 60;
-        this.y = 0;
-        this.width = 60;
-        this.height = 60;
+        this.x = x; // 60
+        this.y = y; // 0
+        this.width = BOX_WH; // BOX_WH
+        this.height = BOX_WH; // BOX_WH
 
-        this.name_width = 15;       // TODO name_text.getBBox().width
-        this.type_height = TEXT_H;  // TODO type_text.getBBox().height
-        this.index_height = 0;      // TODO index_text.getBBox().height
+
+        this.name_width = (this.name.length + 1) * TEXT_W;
+        this.type_height = TEXT_H;
+        this.index_height = 0;
+
+        this.width = this.name_width + Math.max(BOX_WH, (this.value.length + 1) * TEXT_W);
+        this.height = this.type_height + BOX_WH + this.index_height;
+
+        //this.name_width = 15;       // TODO name_text.getBBox().width
+        //this.type_height = TEXT_H;  // TODO type_text.getBBox().height
+        //this.index_height = 0;      // TODO index_text.getBBox().height
+
     }
     render(svg) {
         draw_rect(svg, this);
