@@ -9,7 +9,7 @@ const BG_COLOR = "#fafafa";  // TODO use CSS instead
 const FG_COLOR = "#000000";  // TODO use CSS instead
 
 
-//  QUESTIONNS : left_y, and line 112
+//  QUESTIONNS : left_y, and line 112, what is '__'
 
 function draw_rect(svg, box) {
     let rect = document.createElementNS(NS, "rect");
@@ -59,35 +59,59 @@ function draw_value(svg, box) {
 
 class Diagram {
     constructor(code) {
-        this.left_y = MARGIN; // was just let
-        this.left_width = 3 * MARGIN; 
-        this.right_y = this.left_y; // was just let
+        this.left_y = MARGIN;
+        this.left_width = 3 * MARGIN;
+        this.right_y = this.left_y;
         this.right_width = this.left_width;
 
         this.nodes = [];
 
         let blocks = code.trim().split("\n\n");
-
-
-        for (let i = 0; i < blocks.length; i++) {
-            let node = new LargeBox(blocks[i], MARGIN, this.left_y);
-            this.nodes.push(node);
-            this.left_y += node.height + MARGIN;
-            this.left_width = Math.max(this.left_width, 3 * MARGIN + node.width);
+        for (const block of blocks) {
+            let lines = block.split("\n");
+            if (lines[0].startsWith(":") || lines[0].endsWith(":") || !lines[0].includes(":")) {
+                // Stack (Frames)
+                let node = new LargeBox(lines, MARGIN, this.left_y);
+                this.nodes.push(node);
+                this.left_y += node.height + MARGIN;
+                this.left_width = Math.max(this.left_width, 3 * MARGIN + node.width);
+            } else {
+                // Heap (Objects)
+                let node = new LargeBox(lines, this.left_width + 2 * MARGIN, this.right_y);
+                this.nodes.push(node);
+                this.right_y += node.height + MARGIN;
+                this.right_width = Math.max(this.right_width, 3 * MARGIN + node.width);
+            }
         }
+
+        // for (let i = 0; i < block.length; i++) {
+        //     let parts = block[i].split("\n");
+        //     if (parts[0].startsWith(":") || parts[0].endsWith(":")) {
+        //         // Stack (Frames)
+        //         let node = new LargeBox(parts[0], MARGIN, this.left_y);
+        //         this.nodes.push(node);
+        //         this.left_y += node.height + MARGIN;
+        //         this.left_width = Math.max(this.left_width, 3 * MARGIN + node.width);
+        //     }
+        //     else {
+        //         // Heap (Objects)
+        //         let node = new LargeBox(block, this.left_width + 2 * MARGIN, this.right_y);
+        //         this.nodes.push(node);
+        //         this.right_y += node.height + MARGIN;
+        //         this.right_width = Math.max(this.right_width, 3 * MARGIN + node.width);
+        //     }
+        // }
 
         // diagram size
         this.width = this.left_width + this.right_width;
-        this.height = Math.max(this.left_y, this.right_y); // NAN
+        this.height = Math.max(this.left_y, this.right_y); 
 
     }
     render(div) {
         let svg = document.createElementNS(NS, "svg");
-        svg.setAttribute("width", this.left_width + this.right_width);  // TODO left_width + right_width ("width", "160")
-        svg.setAttribute("height", Math.max(this.left_y, this.right_y));  // TODO max(left_y, right_y) ("height", "80")
+        svg.setAttribute("width", this.left_width + this.right_width);  
+        svg.setAttribute("height", Math.max(this.left_y, this.right_y));
         svg.style.backgroundColor = BG_COLOR;
-        svg.setAttribute("width", this.width); // 220 think deals with diagram not svg
-        svg.setAttribute("height", this.height); // 95
 
 
         // replace previous contents
@@ -104,12 +128,11 @@ class Diagram {
 }
 
 class LargeBox {
-    constructor(code, x, y) {
+    constructor(lines, x, y) {
         this.nodes = [];
         this.x = x;
         this.y = y;
 
-        let lines = code.split("\n");
         if (lines[0].includes(":")) {
             // parse the block specifiation
             let parts = lines[0].split(":");
@@ -129,14 +152,20 @@ class LargeBox {
             this.height = -MARGIN;
         }
 
+        // estimate width and height
         if (this.name && this.height > 0) {
             this.name_width = (this.name.length + 1) * TEXT_W;
             this.width += this.name_width;
-        } else {
-            this.name_width = 0;
+            x += this.name_width;
+        } else {this.name_width = 0;}
+
+        if (this.type != ""){
+            this.type_height = TEXT_H;
+            this.height += this.type_height
+            y += this.type_height;
         }
-        // deal with adding type in the future
-        this.type_height = 0;
+        else {this.type_height = 0;}
+        
         this.index_height = 0;
 
         // parse the remaining lines
@@ -145,15 +174,15 @@ class LargeBox {
             i = 1;
         }
         for (; i < lines.length; i++) {
-            let node = new SmallBox(lines[i], x + this.name_width + this.margin, y + this.margin);
+            let node = new SmallBox(lines[i], x + this.margin, y + this.margin);
             this.nodes.push(node);
             this.width = Math.max(this.width, 2 * this.margin + this.name_width + node.width); // BECOMING NAN HERE
-            this.height += node.height + MARGIN; // AND HERE
-            y += node.height + MARGIN; // check on this (should it just be y or this.y)
+            this.height += node.height + MARGIN;
+            y += node.height + MARGIN;
         }
     }
     render(svg) {
-        if (!this.name == ""){
+        if (!this.name == "") {
             draw_rect(svg, this);
         }
         draw_name(svg, this);
@@ -168,22 +197,42 @@ class LargeBox {
 
 class SmallBox {
     constructor(code, x, y) {
+        this.x = x;
+        this.y = y;
+
         let line = code.trim();
-        [this.type, this.name, this.op, ...this.value] = line.split(" ");
-        this.value = this.value.join(" ");
 
-        this.x = x; // 60
-        this.y = y; // 0
-        this.width = BOX_WH; // BOX_WH
-        this.height = BOX_WH; // BOX_WH
+        if (line.startsWith('"') && line.endsWith('"')) {
+            // String literal
+            this.op = "";
+            this.value = line;
+            this.width = (this.value.length - 2) * TEXT_W;
+            this.height = 0;
+
+            this.name_width = 0;
+            this.type_height = 0;
+            this.index_height = 0;
+        } else {
+            // Variable box
+            [this.type, this.name, this.op, ...this.value] = line.split(" ");
+            this.value = this.value.join(" ");
+
+            this.name_width = (this.name.length + 1) * TEXT_W;
+            this.type_height = TEXT_H;
+            this.index_height = 0;
+        }
 
 
-        this.name_width = (this.name.length + 1) * TEXT_W;
-        this.type_height = TEXT_H;
-        this.index_height = 0;
+        // if (this.op != "@") {
+        //     // value is a pointer add an arrow (future)
+        //     this.width = this.name_width + Math.max(BOX_WH, (this.value.length + 1) * TEXT_W);
+        // } else {
+        //     this.width = this.name_width + BOX_WH;
+        // }
 
         this.width = this.name_width + Math.max(BOX_WH, (this.value.length + 1) * TEXT_W);
         this.height = this.type_height + BOX_WH + this.index_height;
+
 
         //this.name_width = 15;       // TODO name_text.getBBox().width
         //this.type_height = TEXT_H;  // TODO type_text.getBBox().height
