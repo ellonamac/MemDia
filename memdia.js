@@ -271,12 +271,13 @@ function draw_diagram(input, image, output) {
         image = input;
     }
     // 3rd parameter is optional too
-    if (!image) {
+    if (!output) {
         output = input;
     }
 
     // construct and render the diagram
-    dia = new Diagram(input.textContent);
+    let code = input.value ? input.value : input.textContent;
+    dia = new Diagram(code);
     dia.render(image);
 }
 
