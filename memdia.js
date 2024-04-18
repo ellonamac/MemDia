@@ -166,7 +166,6 @@ class LargeBox {
         }
         else {this.type_height = 0;}
         
-        this.index_height = 0;
 
         // parse the remaining lines
         let i = 0;
