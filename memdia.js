@@ -8,8 +8,10 @@ const BOX_WH = 40;  // min width/height of var box
 const BG_COLOR = "#fafafa";  // TODO use CSS instead
 const FG_COLOR = "#000000";  // TODO use CSS instead
 
+// const INLINE = [];
 
-//  QUESTIONNS : left_y, and line 112, what is '__'
+
+//  QUESTIONNS : what is '__'
 
 function draw_rect(svg, box) {
     let rect = document.createElementNS(NS, "rect");
@@ -24,26 +26,30 @@ function draw_rect(svg, box) {
 }
 
 function draw_name(svg, box) {
-    let text = document.createElementNS(NS, "text");
-    svg.appendChild(text);
-    text.textContent = box.name;
+    if (box.name_width) {
+        let text = document.createElementNS(NS, "text");
+        svg.appendChild(text);
+        text.textContent = box.name;
 
-    text.setAttribute("x", box.x + box.name_width - TEXT_W);
-    text.setAttribute("y", box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2);
-    text.setAttribute("text-anchor", "end");
-    text.setAttribute("alignment-baseline", "middle");
+        text.setAttribute("x", box.x + box.name_width - TEXT_W);
+        text.setAttribute("y", box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2);
+        text.setAttribute("text-anchor", "end");
+        text.setAttribute("alignment-baseline", "middle");
+    }
 }
 
 function draw_type(svg, box) {
-    let text = document.createElementNS(NS, "text");
-    svg.appendChild(text);
-    text.textContent = box.type;
+    if (box.type_height) {
+        let text = document.createElementNS(NS, "text");
+        svg.appendChild(text);
+        text.textContent = box.type;
 
-    text.setAttribute("x", box.x + box.name_width);
-    text.setAttribute("y", box.y + TEXT_H / 3);
-    text.setAttribute("alignment-baseline", "middle");
-    text.setAttribute("font-style", "italic");
-    text.setAttribute("font-size", "0.8em");
+        text.setAttribute("x", box.x + box.name_width);
+        text.setAttribute("y", box.y + TEXT_H / 3);
+        text.setAttribute("alignment-baseline", "middle");
+        text.setAttribute("font-style", "italic");
+        text.setAttribute("font-size", "0.8em");
+    }
 }
 
 function draw_value(svg, box) {
@@ -55,6 +61,22 @@ function draw_value(svg, box) {
     text.setAttribute("y", box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2);
     text.setAttribute("text-anchor", "middle");
     text.setAttribute("alignment-baseline", "middle");
+}
+
+function draw_index(svg, box) {
+    if (box.name.includes("__")) {
+        let text = document.createElementNS(NS, "text");
+        svg.appendChild(text);
+        let items = box.name.split("__");
+        text.textContent = items[1];
+
+        text.setAttribute("x", box.x + box.width / 2 + box.name_width / 2);
+        text.setAttribute("y", box.y + box.height - TEXT_H / 3);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("fill", FG_COLOR);
+        text.setAttribute("font-stlye", "italic");
+        text.setAttribute("font-size", "0.8em");
+    }
 }
 
 class Diagram {
@@ -82,34 +104,25 @@ class Diagram {
                 this.right_y += node.height + MARGIN;
                 this.right_width = Math.max(this.right_width, 3 * MARGIN + node.width);
             }
-        }
 
-        // for (let i = 0; i < block.length; i++) {
-        //     let parts = block[i].split("\n");
-        //     if (parts[0].startsWith(":") || parts[0].endsWith(":")) {
-        //         // Stack (Frames)
-        //         let node = new LargeBox(parts[0], MARGIN, this.left_y);
-        //         this.nodes.push(node);
-        //         this.left_y += node.height + MARGIN;
-        //         this.left_width = Math.max(this.left_width, 3 * MARGIN + node.width);
-        //     }
-        //     else {
-        //         // Heap (Objects)
-        //         let node = new LargeBox(block, this.left_width + 2 * MARGIN, this.right_y);
-        //         this.nodes.push(node);
-        //         this.right_y += node.height + MARGIN;
-        //         this.right_width = Math.max(this.right_width, 3 * MARGIN + node.width);
-        //     }
-        // }
+            // What is the purpose of INLINE
+            //     while (INLINE.length > 0){
+            //         lines = INLINE.shift().split();
+            //         let node = new LargeBox(lines, this.left_width + 2 * MARGIN, this.right_y);
+            //         this.nodes.push(node);
+            //         this.right_y += node.height + MARGIN;
+            //         this.right_width = Math.max(this.right_width, 3 * MARGIN + node.width);
+            //     }
+        }
 
         // diagram size
         this.width = this.left_width + this.right_width;
-        this.height = Math.max(this.left_y, this.right_y); 
+        this.height = Math.max(this.left_y, this.right_y);
 
     }
     render(div) {
         let svg = document.createElementNS(NS, "svg");
-        svg.setAttribute("width", this.left_width + this.right_width);  
+        svg.setAttribute("width", this.left_width + this.right_width);
         svg.setAttribute("height", Math.max(this.left_y, this.right_y));
         svg.style.backgroundColor = BG_COLOR;
 
@@ -152,20 +165,32 @@ class LargeBox {
             this.height = -MARGIN;
         }
 
+        if (this.type.endsWith("[]")) {
+            this.margin = 0;
+            this.width = 0;
+            this.height = MARGIN;
+        }
+
+
         // estimate width and height
         if (this.name && this.height > 0) {
             this.name_width = (this.name.length + 1) * TEXT_W;
             this.width += this.name_width;
             x += this.name_width;
-        } else {this.name_width = 0;}
+        } else { this.name_width = 0; }
 
-        if (this.type != ""){
+        if (this.type != "") {
             this.type_height = TEXT_H;
             this.height += this.type_height
             y += this.type_height;
         }
-        else {this.type_height = 0;}
-        
+        else { this.type_height = 0; }
+
+        if (this.type.endsWith("[]")) {
+            this.index_height = TEXT_H;
+            this.height += this.index_height;
+        } else { this.index_height = 0; }
+
 
         // parse the remaining lines
         let i = 0;
@@ -175,7 +200,8 @@ class LargeBox {
         for (; i < lines.length; i++) {
             let node = new SmallBox(lines[i], x + this.margin, y + this.margin);
             this.nodes.push(node);
-            this.width = Math.max(this.width, 2 * this.margin + this.name_width + node.width); // BECOMING NAN HERE
+            this.width = Math.max(this.width, 2 * this.margin + this.name_width +
+                node.width); // BECOMING NAN HERE (something about the name width)
             this.height += node.height + MARGIN;
             y += node.height + MARGIN;
         }
@@ -203,6 +229,7 @@ class SmallBox {
 
         if (line.startsWith('"') && line.endsWith('"')) {
             // String literal
+            this.name = "";
             this.op = "";
             this.value = line;
             this.width = (this.value.length - 2) * TEXT_W;
@@ -211,31 +238,49 @@ class SmallBox {
             this.name_width = 0;
             this.type_height = 0;
             this.index_height = 0;
+        } else if (line.startsWith('{') && line.endsWith('}')) {
+            // Array literal
+            this.name = ""; // this does not need to be here
+            this.op = '@';
+            this.value = [];
+            this.width = 0;
+            this.height = 0;
+
+            let values = line.slice(1, -1).split(",");
+            let op = " = "; // TODO type inference
+            for (let i = 0; i < values.length; i++) {
+                // TODO in the future, get the type from LargeBox
+                let cell = "TODO ix__" + i + op + values[i];
+                let box = new SmallBox(cell, x, y);
+                x += box.width;
+                this.width += box.width;
+                this.value.push(box);
+            }
+
         } else {
             // Variable box
+
             [this.type, this.name, this.op, ...this.value] = line.split(" ");
-            this.value = this.value.join(" ");
+            this.value = this.value.join(" "); // ADD TRIM HERE
 
-            this.name_width = (this.name.length + 1) * TEXT_W;
-            this.type_height = TEXT_H;
-            this.index_height = 0;
+            if (code.includes("__")) {
+                this.name_width = 0;
+                this.type_height = 0;
+                this.index_height = TEXT_H;
+            } else {
+                this.name_width = (this.name.length + 1) * TEXT_W;
+                this.type_height = TEXT_H;
+                this.index_height = 0;
+            }
+
+            // width depends on whether we are drawing an arrow
+            if (this.op != "@") {
+                this.width = this.name_width + Math.max(BOX_WH, (this.value.length + 1) * TEXT_W);
+            } else {
+                this.width = this.name_width + BOX_WH;
+            }
+            this.height = this.type_height + BOX_WH + this.index_height;
         }
-
-
-        // if (this.op != "@") {
-        //     // value is a pointer add an arrow (future)
-        //     this.width = this.name_width + Math.max(BOX_WH, (this.value.length + 1) * TEXT_W);
-        // } else {
-        //     this.width = this.name_width + BOX_WH;
-        // }
-
-        this.width = this.name_width + Math.max(BOX_WH, (this.value.length + 1) * TEXT_W);
-        this.height = this.type_height + BOX_WH + this.index_height;
-
-
-        //this.name_width = 15;       // TODO name_text.getBBox().width
-        //this.type_height = TEXT_H;  // TODO type_text.getBBox().height
-        //this.index_height = 0;      // TODO index_text.getBBox().height
 
     }
     render(svg) {
@@ -243,6 +288,7 @@ class SmallBox {
         draw_name(svg, this);
         draw_type(svg, this);
         draw_value(svg, this);
+        draw_index(svg, this);
     }
 
 }
