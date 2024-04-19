@@ -20,9 +20,7 @@ function draw_rect(svg, box) {
     rect.setAttribute("y", box.y + box.type_height);
     rect.setAttribute("width", box.width - box.name_width);
     rect.setAttribute("height", box.height - box.type_height - box.index_height);
-    if (!box.name.includes("__")) {
-        rect.setAttribute("stroke", FG_COLOR);
-    }
+    rect.setAttribute("stroke", FG_COLOR);
     rect.setAttribute("fill", "none");
 }
 
@@ -55,14 +53,16 @@ function draw_type(svg, box) {
 
 function draw_value(svg, box) {
     // TODO if not ARROWS or box.op != "@"
-    let text = document.createElementNS(NS, "text");
-    svg.appendChild(text);
-    text.textContent = box.value;
+    if (box.value) {
+        let text = document.createElementNS(NS, "text");
+        svg.appendChild(text);
+        text.textContent = box.value;
 
-    text.setAttribute("x", box.x + box.width / 2 + box.name_width / 2);
-    text.setAttribute("y", box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2);
-    text.setAttribute("text-anchor", "middle");
-    text.setAttribute("alignment-baseline", "middle");
+        text.setAttribute("x", box.x + box.width / 2 + box.name_width / 2);
+        text.setAttribute("y", box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("alignment-baseline", "middle");
+    }
 }
 
 function draw_index(svg, box) {
@@ -79,6 +79,28 @@ function draw_index(svg, box) {
         text.setAttribute("font-style", "italic");
         text.setAttribute("font-size", "0.8em");
     }
+}
+
+function draw_vline(svg, box, x) {
+    let line = document.createElementNS(NS, "line");
+    svg.appendChild(line);
+
+    line.setAttribute("x1", x);
+    line.setAttribute("y1", box.y);
+    line.setAttribute("x2", x);
+    line.setAttribute("y2", box.y + BOX_WH);
+    line.setAttribute("stroke", FG_COLOR);
+}
+
+function draw_string(svg, box) {
+    let text = document.createElementNS(NS, "text");
+    svg.appendChild(text);
+    text.textContent = box.value;
+
+    text.setAttribute("x", box.x + box.width / 2);
+    text.setAttribute("y", box.y + box.height / 2);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("alignment-baseline", "middle");
 }
 
 
@@ -286,13 +308,33 @@ class SmallBox {
         }
     }
     render(svg) {
-        draw_rect(svg, this);
-        draw_name(svg, this);
-        draw_type(svg, this);
-        draw_value(svg, this);
-        draw_index(svg, this);
-    }
+        if (!this.op) {
+            // Draw string literal text
+            draw_string(svg, this);
 
+        } else if (this.value instanceof Array) {
+            // Draw array vertical lines
+            let x = this.x;
+            for (let i = 1; i < this.value.length; i++) {
+                x += this.value[i - 1].width;
+                draw_vline(svg, this, x);
+            }
+            // Draw array elements (variables)
+            for (let i = 0; i < this.value.length; i++) {
+                this.value[i].render(svg);
+            }
+
+        } else {
+            // Draw variable box
+            if (!this.name.includes("__")) {
+                draw_rect(svg, this);
+                draw_name(svg, this);
+                draw_type(svg, this);
+            }
+            draw_value(svg, this);
+            draw_index(svg, this);
+        }
+    }
 }
 
 /**
