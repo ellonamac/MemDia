@@ -406,15 +406,3 @@ document.addEventListener("DOMContentLoaded", function () {
         draw_diagram(divs[i]);
     }
 });
-
-
-
-document.addEventListener('DOMContentLoaded', function(event) {
-    let input = document.getElementById('input');
-    const output = document.getElementById('output');
-
-    input.addEventListener('input', function(event){
-        draw_diagram(input, null, output);
-    });
-    // something about the output
-});
