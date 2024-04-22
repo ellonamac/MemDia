@@ -6,7 +6,7 @@
     <title>Memory Diagram Studio</title>
     <style>
         body {margin: 10px;}
-        form {
+        .box {
             display: flex;
             flex-direction: row;
         }
@@ -18,14 +18,18 @@
             resize: none;
         }
     </style>
+    <script src="memdia.js"></script>
 </head>
 <body>
     <h2>Memory Diagram Studio</h2>
-    
-    <form>
-        <textarea name="input" id="" cols="30" rows=""></textarea>
-        <textarea name="output" id="" cols="30" rows=""></textarea>
-    </form> 
+
+    <div class="box">
+        <textarea id="input" cols="30" rows="">
+            int count = 159
+        </textarea>
+        <!-- <div style="border: 2px solid black;" id="output"></div> -->
+        <div id="output" cols="30" rows=""></div>
+    </div>
 
     <textarea style="height: 30vh; width: 100vw;" name="" id="" cols="30" rows=""></textarea>
 </body>

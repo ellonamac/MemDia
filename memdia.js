@@ -103,6 +103,33 @@ function draw_string(svg, box) {
     text.setAttribute("alignment-baseline", "middle");
 }
 
+// should this be box? i dont think it should be...
+function draw_arrows(box){
+    let vars = [];
+    for (let large of box.nodes){
+        for (let small in large.nodes){
+            if (Array.isArray(small.value)){
+                for (let bin in small.value){
+                    vars.push(bin);
+                }
+            }
+            else{
+                vars.push(small);
+            }
+        }
+    }
+
+    for (let src of vars){
+        if (src.op == '@'){
+            for (let dst of box.nodes){
+                if (dst.name == src.value){
+                    // I am lost :/
+                }
+            }
+        }
+    }
+}
+
 
 class Diagram {
     constructor(code) {
@@ -378,4 +405,16 @@ document.addEventListener("DOMContentLoaded", function () {
     for (let i = 0; i < divs.length; i++) {
         draw_diagram(divs[i]);
     }
+});
+
+
+
+document.addEventListener('DOMContentLoaded', function(event) {
+    let input = document.getElementById('input');
+    const output = document.getElementById('output');
+
+    input.addEventListener('input', function(event){
+        draw_diagram(input, null, output);
+    });
+    // something about the output
 });
