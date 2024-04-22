@@ -103,27 +103,40 @@ function draw_string(svg, box) {
     text.setAttribute("alignment-baseline", "middle");
 }
 
-// should this be box? i dont think it should be...
-function draw_arrows(box){
+function draw_defs(svg) {
+
+}
+
+function draw_arrow(svg, src, dst) {
+
+}
+
+function draw_arrows(svg, dia) {
+    // gather all variables including array elements
     let vars = [];
-    for (let large of box.nodes){
-        for (let small in large.nodes){
-            if (Array.isArray(small.value)){
-                for (let bin in small.value){
-                    vars.push(bin);
+    for (let large of dia.nodes) {
+        for (let small in large.nodes) {
+            if (Array.isArray(small.value)) {
+                for (let box in small.value) {
+                    vars.push(box);
                 }
-            }
-            else{
+            } else {
                 vars.push(small);
             }
         }
     }
-
-    for (let src of vars){
-        if (src.op == '@'){
-            for (let dst of box.nodes){
-                if (dst.name == src.value){
-                    // I am lost :/
+    // add arrow for each variable that references
+    let first = true;
+    for (let src of vars) {
+        if (src.op == '@') {
+            // search for the corresponding object
+            for (let dst of dia.nodes) {
+                if (dst.name == src.value) {
+                    if (first) {
+                        draw_defs(svg);
+                        first = false;
+                    }
+                    draw_arrow(svg, src, dst);
                 }
             }
         }
