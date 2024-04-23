@@ -159,6 +159,7 @@ function draw_arrow(svg, src, dst) {
     line.setAttribute("y2", y2);
     line.setAttribute("stroke", FG_COLOR);
     line.setAttribute("marker-end", "url(#arrow)");
+
 }
 
 function draw_arrows(svg, dia) {
