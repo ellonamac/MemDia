@@ -104,42 +104,43 @@ function draw_string(svg, box) {
 }
 
 function draw_defs(svg) {
-    let mark = document.createElementNS(NS, 'marker');
-    svg.appendChild(mark);
+    let defs = document.createElementNS(NS, 'defs');
+    svg.appendChild(defs);
 
+    let mark = document.createElementNS(NS, 'marker');
+    defs.appendChild(mark);
     mark.setAttribute("id", "arrow");
     mark.setAttribute("markerWidth", 16);
     mark.setAttribute("markerHeight", 16);
-    mark.setAttribute("viewBox", 0, 0, 12, 12);
+    mark.setAttribute("viewBox", "0 0 12 12");
     mark.setAttribute("refX", 6);
     mark.setAttribute("refY", 6);
-    mark.setAttribute("orient", auto);
+    mark.setAttribute("orient", "auto");
 
     let path = document.createElementNS(NS, 'path');
-    path.setAttribute("d", "M2, 2 L10, 6 L2, 10 L6, 6 L2, 2");
-    path.setAttribute("fill", FG_COLOR);
-
     mark.appendChild(path);
+    path.setAttribute("d", "M2,2 L10,6 L2,10 L6,6 L2,2");
+    path.setAttribute("fill", FG_COLOR);
 }
 
 function draw_arrow(svg, src, dst) {
-
     let x1 = (src.x / 1) + (src.width / 2);
     let y1 = (src.y / 1) + (src.height / 2);
     let x2 = (dst.x - 8) + (dst.height / 2);
     let y2 = (dst.y / 2) + (dst.height / 2);
-    let x3 = scrc.left_width + 8;
+    let x3 = dia.left_width + 8;
     let y3 = (y1 + y2) / 2
 
     let circle = document.createElementNS(NS, "circle");
+    svg.appendChild(circle);
     circle.setAttribute("cx", x1);
     circle.setAttribute("cy", y1);
     circle.setAttribute("r", 2);
     circle.setAttribute("fill", FG_COLOR);
 
-    let line = document.createElementNS(NS, "line");
-
-    if (x1 > x2){
+    if (x1 > x2) {
+        let line = document.createElementNS(NS, "line");
+        svg.appendChild(line);
         line.setAttribute("x1", x1);
         line.setAttribute("y1", y1);
         line.setAttribute("x2", x3);
@@ -150,26 +151,27 @@ function draw_arrow(svg, src, dst) {
         y3 = y1;
     }
 
+    let line = document.createElementNS(NS, "line");
+    svg.appendChild(line);
     line.setAttribute("x1", x3);
     line.setAttribute("y1", y3);
     line.setAttribute("x2", x2);
     line.setAttribute("y2", y2);
     line.setAttribute("stroke", FG_COLOR);
     line.setAttribute("marker-end", "url(#arrow)");
-
 }
 
 function draw_arrows(svg, dia) {
     // gather all variables including array elements
     let vars = [];
     for (let large of dia.nodes) {
-        for (let small in large.nodes) {
+        for (let small of large.nodes) {
             if (Array.isArray(small.value)) {
-                for (let box in small.value) {
-                    vars.push(box);
+                for (let box of small.value) {
+                    vars.push(box);  // array element
                 }
-            } else {
-                vars.push(small);
+            } else if (small.name) {
+                vars.push(small);  // regular variable
             }
         }
     }
@@ -249,10 +251,9 @@ class Diagram {
         // append the child elements
         for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].render(svg);
-            draw_arrows(svg, this);
         }
 
-        // draw_arrows(svg, this);
+        draw_arrows(svg, this);
     }
 }
 
