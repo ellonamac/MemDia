@@ -16,12 +16,25 @@ function draw_rect(svg, box) {
     let rect = document.createElementNS(NS, "rect");
     svg.appendChild(rect);
 
-    rect.setAttribute("x", box.x + box.name_width);
-    rect.setAttribute("y", box.y + box.type_height);
-    rect.setAttribute("width", box.width - box.name_width);
-    rect.setAttribute("height", box.height - box.type_height - box.index_height);
-    rect.setAttribute("stroke", FG_COLOR);
-    rect.setAttribute("fill", "none");
+    // location and size of rectangle
+    let x = box.x + box.name_width;
+    let y = box.y + box.type_height;
+    let width = box.width - box.name_width;
+    let height = box.height - box.type_height - box.index_height;
+
+    if (!box.name.includes("__")) {
+        rect.setAttribute("x", x);
+        rect.setAttribute("y", y);
+        rect.setAttribute("width", width);
+        rect.setAttribute("height", height);
+        rect.setAttribute("stroke", FG_COLOR);
+        rect.setAttribute("fill", "none");
+    }
+
+    // anchor points for future arrows
+    box.midx = x + width / 2;
+    box.midy = y + height / 2;
+    box.left = x - 8;
 }
 
 function draw_name(svg, box) {
@@ -52,35 +65,30 @@ function draw_type(svg, box) {
 }
 
 function draw_value(svg, box) {
-    // TODO if not ARROWS or box.op != "@"
-    if (box.opr != '@') {
-        if (box.value) {
-            let text = document.createElementNS(NS, "text");
-            svg.appendChild(text);
-            text.textContent = box.value;
+    if (box.op != "@") {
+        let text = document.createElementNS(NS, "text");
+        svg.appendChild(text);
+        text.textContent = box.value;
 
-            text.setAttribute("x", box.x + box.width / 2 + box.name_width / 2);
-            text.setAttribute("y", box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2);
-            text.setAttribute("text-anchor", "middle");
-            text.setAttribute("alignment-baseline", "middle");
-        }
+        text.setAttribute("x", box.x + box.width / 2 + box.name_width / 2);
+        text.setAttribute("y", box.y + box.height / 2 + box.type_height / 2 - box.index_height / 2);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("alignment-baseline", "middle");
     }
 }
 
 function draw_index(svg, box) {
-    if (box.name.includes("__")) {
-        let text = document.createElementNS(NS, "text");
-        svg.appendChild(text);
-        let items = box.name.split("__");
-        text.textContent = items[1];
+    let text = document.createElementNS(NS, "text");
+    svg.appendChild(text);
+    let items = box.name.split("__");
+    text.textContent = items[1];
 
-        text.setAttribute("x", box.x + box.width / 2 + box.name_width / 2);
-        text.setAttribute("y", box.y + box.height - TEXT_H / 3);
-        text.setAttribute("text-anchor", "middle");
-        text.setAttribute("alignment-baseline", "middle");
-        text.setAttribute("font-style", "italic");
-        text.setAttribute("font-size", "0.8em");
-    }
+    text.setAttribute("x", box.x + box.width / 2 + box.name_width / 2);
+    text.setAttribute("y", box.y + box.height - TEXT_H / 3);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("alignment-baseline", "middle");
+    text.setAttribute("font-style", "italic");
+    text.setAttribute("font-size", "0.8em");
 }
 
 function draw_vline(svg, box, x) {
@@ -106,10 +114,10 @@ function draw_string(svg, box) {
 }
 
 function draw_defs(svg) {
-    let defs = document.createElementNS(NS, 'defs');
+    let defs = document.createElementNS(NS, "defs");
     svg.appendChild(defs);
 
-    let mark = document.createElementNS(NS, 'marker');
+    let mark = document.createElementNS(NS, "marker");
     defs.appendChild(mark);
     mark.setAttribute("id", "arrow");
     mark.setAttribute("markerWidth", 16);
@@ -119,19 +127,28 @@ function draw_defs(svg) {
     mark.setAttribute("refY", 6);
     mark.setAttribute("orient", "auto");
 
-    let path = document.createElementNS(NS, 'path');
+    let path = document.createElementNS(NS, "path");
     mark.appendChild(path);
     path.setAttribute("d", "M2,2 L10,6 L2,10 L6,6 L2,2");
     path.setAttribute("fill", FG_COLOR);
 }
 
 function draw_arrow(svg, src, dst) {
-    let x1 = (src.x) + (src.width / 2);
-    let y1 = (src.y) + (src.height / 2);
-    let x2 = (dst.x - 8);
-    let y2 = (dst.y / 2) + (dst.height / 2) + (dst.add_ref() * 8 - 12);
+    let group = document.createElementNS(NS, "g");
+    svg.appendChild(group);
+    svg = group;
+
+    // middle of variable rectangle
+    x1 = src.midx;
+    y1 = src.midy;
+
+    // left side of object rectangle
+    x2 = dst.left;
+    y2 = dst.midy + (dst.add_ref() * 8 - 12);
+
+    // reflection point (if needed)
     let x3 = dia.left_width + 8;
-    let y3 = (y1 + y2) / 2
+    let y3 = (y1 + y2) / 2;
 
     let circle = document.createElementNS(NS, "circle");
     svg.appendChild(circle);
@@ -180,7 +197,7 @@ function draw_arrows(svg, dia) {
     // add arrow for each variable that references
     let first = true;
     for (let src of vars) {
-        if (src.op == '@') {
+        if (src.op == "@") {
             // search for the corresponding object
             for (let dst of dia.nodes) {
                 if (dst.name == src.value) {
@@ -254,7 +271,6 @@ class Diagram {
         for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].render(svg);
         }
-
         draw_arrows(svg, this);
     }
 }
@@ -290,7 +306,7 @@ class LargeBox {
         }
 
         // estimate width and height
-        if (this.name && this.height > 0) {
+        if (this.name && this.height > 0 && !this.type) {
             this.name_width = (this.name.length + 1) * TEXT_W;
             this.width += this.name_width;
             x += this.name_width;
@@ -338,12 +354,15 @@ class LargeBox {
         return this.refs;
     }
     render(svg) {
-        if (this.name != "") {
+        let group = document.createElementNS(NS, "g");
+        svg.appendChild(group);
+        svg = group;
+
+        if (this.name) {
             draw_rect(svg, this);
         }
         draw_name(svg, this);
         draw_type(svg, this);
-        draw_value(svg, this);
         for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].render(svg);
         }
@@ -369,19 +388,25 @@ class SmallBox {
             this.index_height = 0;
         } else if (line.startsWith('{') && line.endsWith('}')) {
             // Array literal
-            this.op = '@';
+            this.op = "@";
             this.value = [];
             this.width = 0;
             this.height = 0;
 
             let values = line.slice(1, -1).split(",");
-            let opr; // TODO type inference
+            let op;
             for (let i = 0; i < values.length; i++) {
-                if (values[0] == '"') { opr = " @ "; }
-                else if (values[0] == values[0].toUpperCase()) { opr = " @ "; }
-                else { opr = " = "; }
+                let val = values[i].trim()
+                // type inference: if value is string or identifier
+                if (val[0] == '"') {
+                    op = " @ ";
+                } else if (/^[A-Z]/.test(val[0])) {
+                    op = " @ ";
+                } else {
+                    op = " = ";
+                }
                 // TODO in the future, get the type from LargeBox
-                let cell = "TODO ix__" + i + opr + values[i];
+                let cell = "TODO ix__" + i + op + val;
                 let box = new SmallBox(cell, x, y);
                 x += box.width;
                 this.width += box.width;
@@ -412,6 +437,10 @@ class SmallBox {
         }
     }
     render(svg) {
+        let group = document.createElementNS(NS, "g");
+        svg.appendChild(group);
+        svg = group;
+
         if (!this.op) {
             // Draw string literal text
             draw_string(svg, this);
@@ -430,13 +459,14 @@ class SmallBox {
 
         } else {
             // Draw variable box
+            draw_rect(svg, this);
+            draw_value(svg, this);
             if (!this.name.includes("__")) {
-                draw_rect(svg, this);
                 draw_name(svg, this);
                 draw_type(svg, this);
+            } else {
+                draw_index(svg, this);
             }
-            draw_value(svg, this);
-            draw_index(svg, this);
         }
     }
 }
@@ -449,13 +479,13 @@ class SmallBox {
  * @param {string} output where to display output
  */
 function draw_diagram(input, image, output) {
-    if (typeof input === 'string') {
+    if (typeof input === "string") {
         input = document.getElementById(input);
     }
-    if (typeof image === 'string') {
+    if (typeof image === "string") {
         image = document.getElementById(image);
     }
-    if (typeof output === 'string') {
+    if (typeof output === "string") {
         output = document.getElementById(output);
     }
 
