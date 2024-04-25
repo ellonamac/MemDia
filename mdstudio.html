@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Diagram Studio</title>
     <style>
-        body {margin: 10px;}
+        body {
+            margin: 10px;
+        }
         .box {
             display: flex;
             flex-direction: row;
         }
         textarea{
             margin: 10px;
-            width: 50vw;
-            height: 50vh;
+            width: 40vw;
+            height: 40vh;
             border: 2px solid black;
             resize: none;
         }
@@ -24,15 +26,12 @@
     <h2>Memory Diagram Studio</h2>
 
     <div class="box">
-        <textarea id="input" cols="30" rows="" oninput="draw_diagram('input', 'output')">
-            int count = 159
-        </textarea>
+        <textarea id="input" cols="30" oninput="draw_diagram('input', 'output')"></textarea>
         <!-- <div style="border: 2px solid black;" id="output"></div> -->
-        <div id="output" cols="30" rows=""></div>
+        <div id="output"></div>
     </div>
 
-    <textarea style="height: 30vh; width: 100vw;" name="" id="" cols="30" rows=""></textarea>
-
+    <!-- <textarea style="height: 30vh; width: 100vw;" name="" id="" cols="30" rows=""></textarea> -->
 
 </body>
 </html>
