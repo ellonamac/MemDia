@@ -7,18 +7,22 @@
     <style>
         body {
             margin: 10px;
+            background-color: #fafafa;
         }
         .box {
             display: flex;
             flex-direction: row;
         }
         textarea{
-            margin: 10px;
+            margin: 0;
+            padding: 0;
             width: 40vw;
-            height: 40vh;
+            height: 60vh;
             border: 2px solid black;
             resize: none;
+            text-align: left;
         }
+
     </style>
     <script src="memdia.js"></script>
 </head>
@@ -26,12 +30,14 @@
     <h2>Memory Diagram Studio</h2>
 
     <div class="box">
-        <textarea id="input" cols="30" oninput="draw_diagram('input', 'output')"></textarea>
-        <!-- <div style="border: 2px solid black;" id="output"></div> -->
-        <div id="output"></div>
-    </div>
+        <textarea id="input" cols="30" rows="30" oninput="draw_diagram('input', 'output')">
 
+        </textarea>
+        <!-- <div style="border: 2px solid black;" id="output"></div> -->
+    </div>
+    <div style="border: 2px solid black;" id="output" cols="30" rows="">jgiroejoi</div>
     <!-- <textarea style="height: 30vh; width: 100vw;" name="" id="" cols="30" rows=""></textarea> -->
+
 
 </body>
 </html>
