@@ -358,7 +358,7 @@ class LargeBox {
         svg.appendChild(group);
         svg = group;
 
-        if (this.name) {
+        if (this.name || this.type) {
             draw_rect(svg, this);
         }
         draw_name(svg, this);
