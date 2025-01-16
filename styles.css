@@ -1,0 +1,50 @@
+body {
+  margin: 0px;
+}
+
+nav {
+  border-bottom: 1px solid black;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+img {
+  padding: 10px;
+  height: 25px;
+  width: 25px;
+}
+
+h2 {
+  margin: 10px;
+  text-align: center;
+  font-size: xx-large;
+}
+
+.box {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+textarea {
+  margin: 10px;
+  border: 2px solid black;
+  resize: none;
+}
+
+#output {
+  background-color: #fafafa;
+  margin: 10px;
+  border: 2px solid black;
+}
+
+textarea, #output {
+  width:  550px;
+  min-height: 400px;
+}
+
+#clearButton {
+  margin-left: 8rem;
+}

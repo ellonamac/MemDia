@@ -214,7 +214,11 @@ function draw_arrows(svg, dia) {
 
 
 class Diagram {
+    static count = 0;
+
     constructor(code) {
+        Diagram.count++;
+        this.id = "Diagram" + Diagram.count;
 
         // coordinates and dimensions
         this.left_y = MARGIN;
@@ -243,7 +247,7 @@ class Diagram {
 
             while (INLINE.length > 0) {
                 // string or array (keep code in sync with else block)
-                lines = INLINE.shift().split();
+                lines = INLINE.shift().split("\n");
                 let node = new LargeBox(lines, this.left_width + 2 * MARGIN, this.right_y);
                 this.nodes.push(node);
                 this.right_y += node.height + MARGIN;
@@ -276,7 +280,11 @@ class Diagram {
 }
 
 class LargeBox {
+    static count = 0;
+
     constructor(lines, x, y) {
+        LargeBox.count++;
+        this.id = "LargeBox" + LargeBox.count;
         this.x = x;
         this.y = y;
 
@@ -370,7 +378,10 @@ class LargeBox {
 }
 
 class SmallBox {
+    static count = 0;
     constructor(code, x, y) {
+        SmallBox.count++;
+        this.id = "SmallBox" + SmallBox.count;
         this.x = x;
         this.y = y;
 
@@ -392,21 +403,25 @@ class SmallBox {
             this.value = [];
             this.width = 0;
             this.height = 0;
-
+            // Create array elements
             let values = line.slice(1, -1).split(",");
-            let op;
+            let op, obj_id;
             for (let i = 0; i < values.length; i++) {
                 let val = values[i].trim()
                 // type inference: if value is string or identifier
                 if (val[0] == '"') {
-                    op = " @ ";
+                    obj_id = "Obj" + SmallBox.count;
+                    INLINE.push(`${obj_id}: String\n${val}`);
+                    op = "@";
+                    val = obj_id;
                 } else if (/^[A-Z]/.test(val[0])) {
-                    op = " @ ";
+                    op = "@";
                 } else {
-                    op = " = ";
+                    op = "=";
                 }
                 // TODO in the future, get the type from LargeBox
-                let cell = "TODO ix__" + i + op + val;
+                // let cell = "TODO ix__" + i + op + val;
+                let cell = `[] ${this.id}__${i} ${op} ${val}`;
                 let box = new SmallBox(cell, x, y);
                 x += box.width;
                 this.width += box.width;
@@ -417,6 +432,15 @@ class SmallBox {
             [this.type, this.name, this.op, ...this.value] = line.split(" ");
             this.value = this.value.join(" ");  // TODO add trim here?
 
+            // Special case: inline string or array
+            if (this.value.startsWith('"') && this.value.endsWith('"') ||
+                this.value.startsWith('{') && this.value.endsWith('}')) {
+                    let obj_id = "Obj" + SmallBox.count;
+                    INLINE.push(`${obj_id}: ${this.type}\n${this.value}`);
+                    this.op = "@";
+                    this.value = obj_id;
+                }
+            // figure out the dimensions
             if (code.includes("__")) {
                 this.name_width = 0;
                 this.type_height = 0;
@@ -508,8 +532,20 @@ function draw_diagram(input, image, output) {
  * Automatically call draw_diagram() on all memdia elements.
  */
 document.addEventListener("DOMContentLoaded", function () {
+    // call for the example already loaded on the page
+    draw_diagram('input', 'output');
+
     let divs = document.getElementsByClassName("memdia");
     for (let i = 0; i < divs.length; i++) {
         draw_diagram(divs[i]);
     }
+});
+
+/**
+ * Clear the text input area and svg
+ */
+let clearButton = document.getElementById("clearButton");
+clearButton.addEventListener("click", () => {
+    document.getElementById("input").value = '';
+    document.getElementById("output").innerHTML = '';
 });

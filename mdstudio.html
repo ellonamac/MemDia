@@ -1,37 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Diagram Studio</title>
-    <style>
-        body {
-            margin: 10px;
-        }
-        .box {
-            display: flex;
-            flex-direction: row;
-        }
-        textarea{
-            margin: 10px;
-            width: 40vw;
-            height: 40vh;
-            border: 2px solid black;
-            resize: none;
-        }
-    </style>
-    <script src="memdia.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-    <h2>Memory Diagram Studio</h2>
+    <nav>
+        <h2>Memory Diagram Studio</h2>
+        <a href="https://github.com/ellonamac/MemDia"><img src="github-mark.png" alt="github logo"></a>
+    </nav>
 
     <div class="box">
-        <textarea id="input" cols="30" oninput="draw_diagram('input', 'output')"></textarea>
-        <!-- <div style="border: 2px solid black;" id="output"></div> -->
+        <textarea id="input" cols="30" oninput="draw_diagram('input', 'output')">
+String status @ S1
+Point p @ P1
+
+S1: String
+"okay"
+
+P1: Point
+double x = 1.2
+double y = 3.4
+        </textarea>
         <div id="output"></div>
     </div>
 
+    <button type="button" id="clearButton">Clear</button>
     <!-- <textarea style="height: 30vh; width: 100vw;" name="" id="" cols="30" rows=""></textarea> -->
 
+    <script src="memdia.js"></script>
 </body>
+
 </html>
