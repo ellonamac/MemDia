@@ -15,7 +15,7 @@ Write your diagram specification in any element with class `memdia`:
 ``` html
 <div class="memdia">
 main:
-    String hello -> "world"
+    String hello @ "world"
 </div>
 ```
 

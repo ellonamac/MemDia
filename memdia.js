@@ -19,7 +19,8 @@ function draw_rect(svg, box) {
     // location and size of rectangle
     let x = box.x + box.name_width;
     let y = box.y + box.type_height;
-    let width = box.width - box.name_width;
+    let width = box.width ?  box.width - box.name_width : box.name_width; // CHECK THIS
+    // let width = box.width - box.name_width;
     let height = box.height - box.type_height - box.index_height;
 
     if (!box.name.includes("__")) {
@@ -107,7 +108,8 @@ function draw_string(svg, box) {
     svg.appendChild(text);
     text.textContent = box.value;
 
-    text.setAttribute("x", box.x + box.width / 2);
+    let width = box.width ?  box.width / 2 : BOX_WH;
+    text.setAttribute("x", box.x + width);
     text.setAttribute("y", box.y + box.height / 2);
     text.setAttribute("text-anchor", "middle");
     text.setAttribute("alignment-baseline", "middle");
@@ -143,8 +145,8 @@ function draw_arrow(svg, src, dst) {
     y1 = src.midy;
 
     // left side of object rectangle
-    x2 = dst.left;
-    y2 = dst.midy + (dst.add_ref() * 8 - 12);
+    x2 = dst.left ?? 0;
+    y2 = (dst.midy ?? 0) + (dst.add_ref() * 8 - 12); // CHECK THIS
 
     // reflection point (if needed)
     let x3 = dia.left_width + 8;
@@ -236,13 +238,13 @@ class Diagram {
                 let node = new LargeBox(lines, MARGIN, this.left_y);
                 this.nodes.push(node);
                 this.left_y += node.height + MARGIN;
-                this.left_width = Math.max(this.left_width, 3 * MARGIN + node.width);
+                this.left_width = Math.max(this.left_width, 3 * MARGIN + node.width || 0);
             } else {
                 // Heap (Objects)
                 let node = new LargeBox(lines, this.left_width + 2 * MARGIN, this.right_y);
                 this.nodes.push(node);
                 this.right_y += node.height + MARGIN;
-                this.right_width = Math.max(this.right_width, 3 * MARGIN + node.width);
+                this.right_width = Math.max(this.right_width, 3 * MARGIN + node.width || 0);
             }
 
             while (INLINE.length > 0) {
@@ -446,7 +448,7 @@ class SmallBox {
                 this.type_height = 0;
                 this.index_height = TEXT_H;
             } else {
-                this.name_width = (this.name.length + 1) * TEXT_W;
+                this.name_width = (this.name?.length + 1) * TEXT_W;
                 this.type_height = TEXT_H;
                 this.index_height = 0;
             }
@@ -539,13 +541,4 @@ document.addEventListener("DOMContentLoaded", function () {
     for (let i = 0; i < divs.length; i++) {
         draw_diagram(divs[i]);
     }
-});
-
-/**
- * Clear the text input area and svg
- */
-let clearButton = document.getElementById("clearButton");
-clearButton.addEventListener("click", () => {
-    document.getElementById("input").value = '';
-    document.getElementById("output").innerHTML = '';
 });

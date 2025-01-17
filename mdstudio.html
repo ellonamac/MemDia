@@ -14,25 +14,44 @@
         <a href="https://github.com/ellonamac/MemDia"><img src="github-mark.png" alt="github logo"></a>
     </nav>
 
+    <div class="welcome">
+       <p><b>Welcome to MdStudio!</b> A tool for rendering memory diagrams in real time! In the box on the left, enter the code you would like to visualize as a memory diagram.
+        The SVG representation of your memory diagram will appear on the right. To learn more about how to use MdStudio click the link in the upper right hand corner!</p>
+    </div>
+
     <div class="box">
         <textarea id="input" cols="30" oninput="draw_diagram('input', 'output')">
 String status @ S1
 Point p @ P1
 
 S1: String
-"okay"
+    "okay"
 
 P1: Point
-double x = 1.2
-double y = 3.4
+    double x = 1.2
+    double y = 3.4
         </textarea>
         <div id="output"></div>
     </div>
 
-    <button type="button" id="clearButton">Clear</button>
+    <div class="utils">
+        <button type="button" id="clearButton">Clear</button>
+    </div>
     <!-- <textarea style="height: 30vh; width: 100vw;" name="" id="" cols="30" rows=""></textarea> -->
 
     <script src="memdia.js"></script>
+    <script>
+        /**
+         * Clear the text input area and svg
+         */
+        let clearButton = document.getElementById("clearButton");
+        clearButton.addEventListener("click", () => {
+            document.getElementById("input").value = '';
+            document.getElementById("output").innerHTML = '';
+        });
+        let input = document.getElementById('input');
+        input.value = input.value.trim();
+    </script>
 </body>
 
 </html>
