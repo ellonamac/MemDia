@@ -19,7 +19,7 @@ function draw_rect(svg, box) {
     // location and size of rectangle
     let x = box.x + box.name_width;
     let y = box.y + box.type_height;
-    let width = box.width ?  box.width - box.name_width : box.name_width; // CHECK THIS
+    let width = box.width - box.name_width;
     // let width = box.width - box.name_width;
     let height = box.height - box.type_height - box.index_height;
 
@@ -108,7 +108,7 @@ function draw_string(svg, box) {
     svg.appendChild(text);
     text.textContent = box.value;
 
-    let width = box.width ?  box.width / 2 : BOX_WH;
+    let width = box.width ? box.width / 2 : BOX_WH;
     text.setAttribute("x", box.x + width);
     text.setAttribute("y", box.y + box.height / 2);
     text.setAttribute("text-anchor", "middle");
@@ -146,7 +146,7 @@ function draw_arrow(svg, src, dst) {
 
     // left side of object rectangle
     x2 = dst.left ?? 0;
-    y2 = (dst.midy ?? 0) + (dst.add_ref() * 8 - 12); // CHECK THIS
+    y2 = (dst.midy ?? 0) + (dst.add_ref() * 8 - 12);
 
     // reflection point (if needed)
     let x3 = dia.left_width + 8;
@@ -202,12 +202,15 @@ function draw_arrows(svg, dia) {
         if (src.op == "@") {
             // search for the corresponding object
             for (let dst of dia.nodes) {
-                if (dst.name == src.value) {
+                if (dst.name && dst.name == src.value) {
                     if (first) {
                         draw_defs(svg);
                         first = false;
                     }
-                    draw_arrow(svg, src, dst);
+                    // draw arrow only if dst has been placed
+                    if (dst.left) {
+                        draw_arrow(svg, src, dst);
+                    }
                 }
             }
         }
@@ -253,7 +256,7 @@ class Diagram {
                 let node = new LargeBox(lines, this.left_width + 2 * MARGIN, this.right_y);
                 this.nodes.push(node);
                 this.right_y += node.height + MARGIN;
-                this.right_width = Math.max(this.right_width, 3 * MARGIN + node.width);
+                this.right_width = Math.max(this.right_width, 3 * MARGIN + node.width || 0);
             }
         }
 
@@ -351,7 +354,7 @@ class LargeBox {
         for (; i < lines.length; i++) {
             let node = new SmallBox(lines[i], x + this.margin, y + this.margin);
             this.nodes.push(node);
-            this.width = Math.max(this.width, 2 * this.margin + this.name_width + node.width);
+            this.width = Math.max(this.width, 2 * this.margin + this.name_width + node.width || 0);
             this.height += node.height + MARGIN;
             y += node.height + MARGIN;
         }
